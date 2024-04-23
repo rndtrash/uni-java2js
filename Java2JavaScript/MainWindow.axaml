@@ -5,7 +5,19 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Java2JavaScript.MainWindow"
         Title="Java2JavaScript">
-    <Grid ColumnDefinitions="*,4,*" RowDefinitions="Auto,*">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MinHeight="150" />
+            <RowDefinition Height="4" />
+            <RowDefinition Height="Auto" MinHeight="50" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="200" />
+            <ColumnDefinition Width="4" />
+            <ColumnDefinition Width="*" MinWidth="300" />
+        </Grid.ColumnDefinitions>
+
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal">
             <Button Click="OpenFile">Открыть</Button>
             <Button Click="Tokenize">Токенизировать</Button>
@@ -17,10 +29,11 @@
             AcceptsReturn="True"
             Grid.Row="1"
             Grid.Column="0"
+            Grid.RowSpan="3"
             MinWidth="200"
             TextWrapping="WrapWithOverflow"
             Watermark="Исходный код на Java" />
-        <GridSplitter Grid.Row="1" Grid.Column="1" ResizeDirection="Columns" />
+        <GridSplitter Grid.Column="1" Grid.Row="1" Grid.RowSpan="3" ResizeDirection="Columns" />
         <TextBox
             Name="ProcessedTextBox"
             Grid.Row="1"
@@ -30,5 +43,37 @@
             IsReadOnly="True"
             TextWrapping="WrapWithOverflow"
             Watermark="Токены Java" />
+        <GridSplitter Grid.Column="2" Grid.Row="2" ResizeDirection="Rows" />
+        <Expander
+            Grid.Row="3"
+            Grid.Column="2"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch">
+            <Expander.Header>
+                Состояние токенизатора
+            </Expander.Header>
+            <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, *">
+                <Label Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">
+                    Тип токена:
+                </Label>
+                <ComboBox
+                    Name="TokenTypeComboBox"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    HorizontalAlignment="Stretch"
+                    SelectedIndex="0">
+                    <ComboBoxItem>Зарезервированные (W)</ComboBoxItem>
+                    <ComboBoxItem>Разделители (R)</ComboBoxItem>
+                    <ComboBoxItem>Операторы (O)</ComboBoxItem>
+                    <ComboBoxItem>Численные константы (N)</ComboBoxItem>
+                    <ComboBoxItem>Буквенные константы (C)</ComboBoxItem>
+                </ComboBox>
+                <TextBox
+                    Name="TokenListTextBox"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2" />
+            </Grid>
+        </Expander>
     </Grid>
 </Window>
