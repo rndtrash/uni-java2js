@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace Java2JavaScript;
 
-public class JavaTokenizer
+public partial class JavaTokenizer
 {
     public enum TokenType
     {
@@ -58,7 +59,9 @@ public class JavaTokenizer
         "]",
         "{",
         "}",
-        ","
+        ",",
+        ".",
+        ";"
     ];
 
     public static readonly string[] Operations =
@@ -78,9 +81,17 @@ public class JavaTokenizer
         "!"
     ];
 
-    protected List<string> LiteralConstants = [];
-    protected List<string> NumericConstants = [];
+    public List<string> LiteralConstants = [];
+    public List<string> NumericConstants = [];
+    
     protected Dictionary<string, JavaToken> Tokens = new();
+
+    // TODO: научная нотация???
+    [GeneratedRegex(@"^([+\-]?)([0-9]+)(\.[0-9]+)?$", RegexOptions.Compiled)]
+    protected static partial Regex NumberRegex();
+
+    [GeneratedRegex(@"^[a-zA-Z_][a-zA-Z0-9_]*$", RegexOptions.Compiled)]
+    protected static partial Regex LiteralRegex();
 
     public JavaTokenizer()
     {
@@ -103,18 +114,34 @@ public class JavaTokenizer
         }
     }
 
-    private void AddLiteral(string literal)
+    private JavaToken AddLiteral(string literal)
     {
         var javaToken = new JavaToken(TokenType.LiteralConstant, LiteralConstants.Count);
         LiteralConstants.Add(literal);
         Tokens.Add(literal, javaToken);
+        return javaToken;
     }
 
-    private void AddNumber(string number)
+    private bool TryAddLiteral(string substring, out JavaToken? token)
+    {
+        var match = LiteralRegex().Match(substring);
+        token = !match.Success ? null : AddLiteral(substring);
+        return match.Success;
+    }
+
+    private JavaToken AddNumber(string number)
     {
         var javaToken = new JavaToken(TokenType.NumericConstant, NumericConstants.Count);
         NumericConstants.Add(number);
         Tokens.Add(number, javaToken);
+        return javaToken;
+    }
+
+    private bool TryAddNumber(string substring, out JavaToken? token)
+    {
+        var match = NumberRegex().Match(substring);
+        token = !match.Success ? null : AddNumber(substring);
+        return match.Success;
     }
 
     public IEnumerable<JavaToken> Tokenize(string input)
@@ -131,15 +158,28 @@ public class JavaTokenizer
                 i++;
                 continue;
             }
-            
+
             var j = i;
             while (j < input.Length && input[j] != ' ')
                 j++;
-            
+
             var substring = input.Substring(i, j - i);
 
-            if (Tokens.TryGetValue(substring, out var javaToken))
+            JavaToken? javaToken;
+            if (Tokens.TryGetValue(substring, out javaToken))
+            {
+            }
+            else if (TryAddLiteral(substring, out javaToken))
+            {
+            }
+            else if (TryAddNumber(substring, out javaToken))
+            {
+            }
+
+            if (javaToken != null)
+            {
                 tokens.Add(javaToken);
+            }
             else
             {
                 Debug.WriteLine($"Invalid token: {substring}");
@@ -147,7 +187,7 @@ public class JavaTokenizer
 
             i = j + 1;
         } while (i < input.Length);
-        
+
         Debug.Flush();
 
         return tokens;
